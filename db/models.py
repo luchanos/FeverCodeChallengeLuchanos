@@ -1,10 +1,9 @@
 import uuid
 
 from sqlalchemy import Column
-from sqlalchemy import Date
+from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import String
-from sqlalchemy import Time
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
@@ -12,17 +11,18 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class Zone(Base):
-    __tablename__ = "zones"
+class Event(Base):
+    __tablename__ = "events"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    event_id = Column(String)
+    base_event_id = Column(String)
     title = Column(String)
-    zone_id = Column(String)
     price = Column(Float)
-    start_date = Column(Date)
-    start_time = Column(Time)
-    end_date = Column(Date)
-    end_time = Column(Time)
-
-    UniqueConstraint("event_id", "zone_id", name="event_id_zone_id_idx")
+    event_start_date = Column(DateTime(timezone=True))
+    event_end_date = Column(DateTime(timezone=True))
+    zone_id = Column(String)
+    __table_args__ = (
+        UniqueConstraint(
+            "base_event_id", "zone_id", "price", name="base_event_id_zone_id_price_idx"
+        ),
+    )
