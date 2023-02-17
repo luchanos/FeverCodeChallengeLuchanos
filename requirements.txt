@@ -1,3 +1,5 @@
 requests==2.28.2
 pydantic==1.10.5
 pydantic-xml==0.6.0
+uvicorn==0.20.0
+fastapi==0.92.0
