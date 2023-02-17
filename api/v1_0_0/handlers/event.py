@@ -5,11 +5,24 @@ from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import Query
 from fastapi.params import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.dals import EventDAL
 from db.session import get_db
 
 events_router = APIRouter()
 api_v1_0_0_router = APIRouter()
+
+
+async def get_events_by_date_range(
+    session: AsyncSession, start_date: datetime.datetime, end_date: datetime.datetime
+):
+    async with session.begin():
+        user_dal = EventDAL(session)
+        events = await user_dal.get_events_by_time_range(
+            start_date=start_date, end_date=end_date
+        )
+        return events
 
 
 @events_router.get(path="/search")
@@ -30,6 +43,7 @@ async def get_events(
         raise HTTPException(
             status_code=422, detail="Start date can't be later, than end date"
         )
+    await get_events_by_date_range(session=db, start_date=start_date, end_date=end_date)
     return {"Success": True}
 
 
