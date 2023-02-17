@@ -3,3 +3,7 @@ pydantic==1.10.5
 pydantic-xml==0.6.0
 uvicorn==0.20.0
 fastapi==0.92.0
+SQLAlchemy==1.4.45
+envparse==0.2.0
+asyncpg==0.27.0
+greenlet==2.0.2

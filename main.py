@@ -1,20 +1,25 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
 import uvicorn
+
+from db.session import get_db
 
 app = FastAPI()
 service_router = APIRouter()
-
-
-def get_db():
-    pass
+events_router = APIRouter()
 
 
 @service_router.get(path="/ping")
-def ping():
+async def ping():
+    return {"Success": True}
+
+
+@events_router.get(path="/events")
+async def get_events(db=Depends(get_db)):
     return {"Success": True}
 
 
 app.include_router(service_router)
+app.include_router(events_router)
 
 if __name__ == "__main__":
     uvicorn.run(app)
