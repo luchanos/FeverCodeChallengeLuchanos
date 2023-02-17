@@ -1,5 +1,7 @@
-from fastapi import FastAPI, APIRouter, Depends
 import uvicorn
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import FastAPI
 
 from db.session import get_db
 

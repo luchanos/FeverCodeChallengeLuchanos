@@ -1,6 +1,11 @@
 import uuid
 
-from sqlalchemy import Column, String, Float, UniqueConstraint, Date, Time
+from sqlalchemy import Column
+from sqlalchemy import Date
+from sqlalchemy import Float
+from sqlalchemy import String
+from sqlalchemy import Time
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 

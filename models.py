@@ -1,6 +1,8 @@
 from typing import Tuple
 
-from pydantic_xml import BaseXmlModel, attr, element
+from pydantic_xml import attr
+from pydantic_xml import BaseXmlModel
+from pydantic_xml import element
 
 
 class BaseXmlTunedModel(BaseXmlModel):
@@ -13,7 +15,7 @@ class Zone(BaseXmlTunedModel):
 
 
 class Event(BaseXmlTunedModel):
-    zones: Tuple[Zone, ...] = element(tag='zone')
+    zones: Tuple[Zone, ...] = element(tag="zone")
     event_start_date: str = attr()
     event_end_date: str = attr()
     event_id: str = attr()
@@ -23,11 +25,11 @@ class BaseEvent(BaseXmlTunedModel):
     base_event_id: str = attr()
     sell_mode: str = attr()
     title: str = attr()
-    events: Tuple[Event, ...] = element(tag='event')
+    events: Tuple[Event, ...] = element(tag="event")
 
 
 class Output(BaseXmlTunedModel):
-    base_events: Tuple[BaseEvent, ...] = element(tag='base_event')
+    base_events: Tuple[BaseEvent, ...] = element(tag="base_event")
 
 
 class eventList(BaseXmlTunedModel):
