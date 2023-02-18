@@ -43,8 +43,10 @@ async def get_events(
         raise HTTPException(
             status_code=422, detail="Start date can't be later, than end date"
         )
-    await get_events_by_date_range(session=db, start_date=start_date, end_date=end_date)
-    return {"Success": True}
+    events = await get_events_by_date_range(
+        session=db, start_date=start_date, end_date=end_date
+    )
+    return {"Success": True, "list_of_events": events}
 
 
 api_v1_0_0_router.include_router(events_router)

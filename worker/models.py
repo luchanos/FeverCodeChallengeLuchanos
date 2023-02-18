@@ -1,3 +1,4 @@
+import datetime
 from typing import Tuple
 
 from pydantic_xml import attr
@@ -11,13 +12,14 @@ class BaseXmlTunedModel(BaseXmlModel):
 
 
 class Zone(BaseXmlTunedModel):
+    price: float = attr()
     zone_id: str = attr()
 
 
 class Event(BaseXmlTunedModel):
     zones: Tuple[Zone, ...] = element(tag="zone")
-    event_start_date: str = attr()
-    event_end_date: str = attr()
+    event_start_date: datetime.datetime = attr()
+    event_end_date: datetime.datetime = attr()
     event_id: str = attr()
 
 
