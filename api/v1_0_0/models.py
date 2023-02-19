@@ -11,7 +11,7 @@ class TunedModel(BaseModel):
         orm_mode = True
 
 
-class EventResponse(TunedModel):
+class EventSummary(TunedModel):
     id: uuid.UUID
     title: str
     start_date: datetime.date
@@ -22,9 +22,9 @@ class EventResponse(TunedModel):
     min_price: float
 
 
-class Data(TunedModel):
-    events: list[EventResponse]
+class EventList(TunedModel):
+    events: list[EventSummary]
 
 
 class BaseResponse(TunedModel):
-    data: Data
+    data: EventList

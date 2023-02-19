@@ -8,8 +8,8 @@ from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1_0_0.models import BaseResponse
-from api.v1_0_0.models import Data
-from api.v1_0_0.models import EventResponse
+from api.v1_0_0.models import EventList
+from api.v1_0_0.models import EventSummary
 from db.dals import EventDAL
 from db.session import get_db
 
@@ -19,7 +19,7 @@ api_v1_0_0_router = APIRouter()
 
 async def get_events_by_date_range(
     session: AsyncSession, start_date: datetime.datetime, end_date: datetime.datetime
-) -> list[EventResponse]:
+) -> list[EventSummary]:
     async with session.begin():
         user_dal = EventDAL(session)
         events = await user_dal.get_events_by_time_range(
@@ -29,7 +29,7 @@ async def get_events_by_date_range(
         for event in events:
             event = dict(event)
             result.append(
-                EventResponse(
+                EventSummary(
                     **{
                         "id": event["id"],
                         "title": event["title"],
@@ -66,7 +66,7 @@ async def get_events(
     events = await get_events_by_date_range(
         session=db, start_date=start_date, end_date=end_date
     )
-    return BaseResponse(data=Data(events=events))
+    return BaseResponse(data=EventList(events=events))
 
 
 api_v1_0_0_router.include_router(events_router)

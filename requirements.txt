@@ -16,3 +16,8 @@ black==23.1.0
 
 # worker
 aiohttp==3.8.4
+
+# tests
+pytest==7.2.0
+pytest-asyncio==0.20.3
+httpx==0.23.3
