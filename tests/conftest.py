@@ -1,8 +1,12 @@
 import asyncio
+import datetime
+import json
 import os
+import uuid
 from typing import Any
 from typing import Generator
 
+import asyncpg
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -12,9 +16,6 @@ from starlette.testclient import TestClient
 import settings
 from db.session import get_db
 from main import app
-
-# from datetime import timedelta
-# import asyncpg
 
 CLEAN_TABLES = ["events", "base_events"]
 
@@ -79,25 +80,62 @@ async def client() -> Generator[TestClient, Any, None]:
         yield client
 
 
+@pytest.fixture(scope="session")
+async def asyncpg_pool():
+    pool = await asyncpg.create_pool(
+        "".join(settings.TEST_DATABASE_URL.split("+asyncpg"))
+    )
+    yield pool
+    pool.close()
+
+
 @pytest.fixture
-async def create_user_in_database(asyncpg_pool):
-    async def create_user_in_database(
-        user_id: str,
-        name: str,
-        surname: str,
-        email: str,
-        is_active: bool,
-        hashed_password: str,
+async def create_base_event_in_database(asyncpg_pool):
+    async def create_base_event_in_database_inner(
+        base_event_id: str,
+        sell_mode: str,
+        title: str,
+        is_active: bool = True,
+        last_update_dt: datetime.datetime = datetime.datetime.now(),
     ):
         async with asyncpg_pool.acquire() as connection:
             return await connection.execute(
-                """INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6)""",
-                user_id,
-                name,
-                surname,
-                email,
+                """INSERT INTO base_events (base_event_id, sell_mode, title, is_active, last_updated_dt)
+                 VALUES ($1, $2, $3, $4, $5)""",
+                base_event_id,
+                sell_mode,
+                title,
                 is_active,
-                hashed_password,
+                last_update_dt,
             )
 
-    return create_user_in_database
+    return create_base_event_in_database_inner
+
+
+@pytest.fixture
+async def create_event_in_database(asyncpg_pool):
+    async def create_event_in_database_inner(
+        _id: uuid.UUID,
+        event_id: str,
+        base_event_id: str,
+        zones: list[dict],
+        event_start_date: datetime.datetime,
+        event_end_date: datetime.datetime,
+        is_active: bool = True,
+        last_updated_dt: datetime.datetime = datetime.datetime.now(),
+    ):
+        async with asyncpg_pool.acquire() as connection:
+            return await connection.execute(
+                """INSERT INTO events (id, event_id, base_event_id, zones, event_start_date, event_end_date, is_active, last_updated_dt)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)""",
+                _id,
+                event_id,
+                base_event_id,
+                json.dumps(zones),
+                event_start_date,
+                event_end_date,
+                is_active,
+                last_updated_dt,
+            )
+
+    return create_event_in_database_inner
