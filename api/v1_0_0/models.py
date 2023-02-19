@@ -4,7 +4,14 @@ import uuid
 from pydantic import BaseModel
 
 
-class EventResponse(BaseModel):
+class TunedModel(BaseModel):
+    class Config:
+        """tells pydantic to convert even non dict obj to json"""
+
+        orm_mode = True
+
+
+class EventResponse(TunedModel):
     id: uuid.UUID
     start_date: datetime.date
     start_time: datetime.time
@@ -14,9 +21,9 @@ class EventResponse(BaseModel):
     min_price: float
 
 
-class Data(BaseModel):
+class Data(TunedModel):
     events: list[EventResponse]
 
 
-class BaseResponse(BaseModel):
+class BaseResponse(TunedModel):
     data: Data
