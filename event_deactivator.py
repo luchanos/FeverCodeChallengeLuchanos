@@ -1,13 +1,12 @@
 import asyncio
 
+from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 import settings
 from db.dals import EventDAL
-
-# from apscheduler.schedulers.blocking import BlockingScheduler
 
 
 class EventDeactivator:
@@ -34,10 +33,10 @@ async def event_deactivator_func():
             await event_deactivator()
 
 
-# def main():
-asyncio.run(event_deactivator_func())
+def main():
+    asyncio.run(event_deactivator_func())
 
 
-# scheduler = BlockingScheduler()
-# scheduler.add_job(main, 'interval', minutes=1)
-# scheduler.start()
+scheduler = BlockingScheduler()
+scheduler.add_job(main, "interval", minutes=1)
+scheduler.start()
