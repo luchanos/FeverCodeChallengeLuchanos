@@ -1,7 +1,5 @@
 import datetime
 
-from sqlalchemy import and_
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import Event
@@ -16,13 +14,22 @@ class EventDAL:
     async def get_events_by_time_range(
         self, start_date: datetime.datetime, end_date: datetime.datetime
     ):
-        query = select(Event).where(
-            and_(Event.event_start_date >= start_date, Event.event_end_date <= end_date)
+        query = """
+SELECT e.id, e.event_start_date, e.event_end_date, right_table.max_price, right_table.min_price
+FROM events e
+LEFT JOIN (
+SELECT id, max(prices.price_value) AS max_price, min(prices.price_value) AS min_price FROM (
+WITH cte AS (
+SELECT id, (jsonb_array_elements(zones) ->> 'price')::decimal AS price_value FROM events GROUP BY id)
+SELECT id, price_value FROM cte) AS prices GROUP BY prices.id) right_table
+ON e.id = right_table.id
+WHERE event_start_date >= :start_date AND event_end_date <= :end_date;
+"""
+        res = await self.db_session.execute(
+            query, {"start_date": start_date, "end_date": end_date}
         )
-        res = await self.db_session.execute(query)
-        events_row = res.fetchall()
-        if events_row is not None:
-            return [event[0] for event in events_row]
+        fetched_result = res.fetchall()
+        return fetched_result
 
     async def write_events_to_database(self, events_list):
         for event in events_list:
