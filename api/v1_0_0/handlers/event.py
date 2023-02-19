@@ -32,6 +32,7 @@ async def get_events_by_date_range(
                 EventResponse(
                     **{
                         "id": event["id"],
+                        "title": event["title"],
                         "start_date": event["event_start_date"].date(),
                         "start_time": event["event_start_date"].time(),
                         "end_date": event["event_end_date"].date(),

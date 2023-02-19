@@ -13,6 +13,7 @@ class TunedModel(BaseModel):
 
 class EventResponse(TunedModel):
     id: uuid.UUID
+    title: str
     start_date: datetime.date
     start_time: datetime.time
     end_date: datetime.date
