@@ -67,7 +67,7 @@ def create_update_events_query(event, base_event_id):
         )
         .on_conflict_do_update(
             index_elements=[Event.base_event_id, Event.event_id],
-            set_=dict(last_updated_dt=datetime.datetime.now()),
+            set_=dict(last_updated_dt=datetime.datetime.now(), is_active=True),
         )
     )
 

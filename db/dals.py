@@ -1,5 +1,6 @@
 import datetime
 
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import Event
@@ -44,4 +45,16 @@ LEFT JOIN base_events be ON d.base_event_id = be.base_event_id;
                 zone_id=event["zone_id"],
             )
             self.db_session.add(new_event)
+        # todo luchanos тут я записываю всё сразу
         await self.db_session.flush()
+
+    async def deactivate_events_older_than_limit(self, limit_days: int):
+        query = (
+            update(Event)
+            .where(
+                Event.last_updated_dt
+                <= datetime.datetime.now() - datetime.timedelta(days=limit_days)
+            )
+            .values({"is_active": False})
+        )
+        await self.db_session.execute(query)
