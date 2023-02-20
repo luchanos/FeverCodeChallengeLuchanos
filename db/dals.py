@@ -4,6 +4,7 @@ from sqlalchemy import and_
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
+from sqlalchemy.engine import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import BaseEvent
@@ -19,7 +20,7 @@ class EventDAL:
 
     async def get_events_by_time_range(
         self, start_date: datetime.datetime, end_date: datetime.datetime
-    ) -> list:
+    ) -> list[Row]:
 
         subquery = (
             select(
@@ -39,7 +40,7 @@ class EventDAL:
             .subquery()
         )
 
-        query_2 = (
+        query = (
             select(
                 BaseEvent.title,
                 subquery.c.id,
@@ -56,7 +57,7 @@ class EventDAL:
                 subquery.c.event_start_date,
             )
         )
-        res = await self.db_session.execute(query_2)
+        res = await self.db_session.execute(query)
         fetched_result = res.fetchall()
         return fetched_result
 
