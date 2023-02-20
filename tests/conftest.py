@@ -126,7 +126,8 @@ async def create_event_in_database(asyncpg_pool: Pool) -> Callable:
     ):
         async with asyncpg_pool.acquire() as connection:
             return await connection.execute(
-                """INSERT INTO events (id, event_id, base_event_id, event_start_date, event_end_date, is_active, last_updated_dt)
+                """INSERT INTO events (id, event_id, base_event_id,
+                 event_start_date, event_end_date, is_active, last_updated_dt)
                  VALUES ($1, $2, $3, $4, $5, $6, $7)""",
                 _id,
                 event_id,
