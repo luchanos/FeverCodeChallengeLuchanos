@@ -25,8 +25,8 @@ async def get_events_by_date_range(
                     start_time=event["event_start_date"].time(),
                     end_date=event["event_end_date"].date(),
                     end_time=event["event_end_date"].time(),
-                    max_price=event["max_price"],
-                    min_price=event["min_price"],
+                    max_price=event["max"],
+                    min_price=event["min"],
                 )
             )
         return result
