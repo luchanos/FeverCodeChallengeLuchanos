@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 import settings
 from db.models import BaseEvent
 from db.models import Event
-from worker.models import eventList
+from workers.models import eventList
 
 # import aiohttp
 

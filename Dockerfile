@@ -12,13 +12,9 @@ RUN apt-get -y update && \
 COPY . .
 WORKDIR .
 
-# pip & poetry
+# requirements
 RUN python3 -m pip install --user --upgrade pip && \
-    python3 -m pip install poetry
-
-RUN poetry config virtualenvs.create false
-
-RUN poetry install
+    python3 -m pip install -r requirements.txt
 
 # Configration
 EXPOSE 8000
