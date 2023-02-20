@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  web:
+    container_name: web
+    image: nginx:alpine
+    depends_on:
+      - app
+    ports:
+      - "8082:80"
+    volumes:
+      - ./app/conf.d:/etc/nginx/conf.d
+    networks:
+      - custom
+  app:
+    container_name: app
+    image: fever_code_challenge_app
+    environment:
+      - REAL_DATABASE_URL=postgresql://postgres:postgres@db/postgresql
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - custom
+  db:
+      image: db
+      container_name: "db"
+      ports:
+        - "5432:5432"
+      networks:
+        - custom
+networks:
+  custom:
+    driver: bridge

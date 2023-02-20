@@ -30,4 +30,4 @@ app.include_router(api_v1_0_0_router, prefix="/1.0.0", tags=["1.0.0"])
 app.include_router(service_router)
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
