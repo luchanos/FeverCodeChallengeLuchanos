@@ -23,19 +23,6 @@ class EventDAL:
         fetched_result = res.fetchall()
         return fetched_result
 
-    async def write_events_to_database(self, events_list):
-        for event in events_list:
-            new_event = Event(
-                base_event_id=event["base_event_id"],
-                title=event["title"],
-                price=event["price"],
-                event_start_date=event["event_start_date"],
-                event_end_date=event["event_start_date"],
-                zone_id=event["zone_id"],
-            )
-            self.db_session.add(new_event)
-        await self.db_session.flush()
-
     async def deactivate_events_older_than_limit(self, limit_days: int):
         query = (
             update(Event)
