@@ -75,7 +75,7 @@ def create_update_events_query(event, base_event_id):
     )
 
 
-async def get_event_list_from_provider():
+async def get_event_list_from_provider() -> eventList:
     async with aiohttp.ClientSession() as session:
         async with session.get(settings.PROVIDER_URL, ssl=False) as resp:
             xml_from_resp = await resp.text()
