@@ -154,7 +154,7 @@ class EventRefreshWorker:
                 continue
             await self.update_events(base_event=base_event, db_session=db_session)
 
-    async def execute(self):
+    async def __call__(self, *args, **kwargs):
         import pathlib
 
         xml_doc = pathlib.Path("response.xml").read_text()
@@ -163,9 +163,6 @@ class EventRefreshWorker:
         async with self.db_session_instance() as db_session:
             async with db_session.begin():
                 await self.refresh_storage(event_list, db_session=db_session)
-
-    async def __call__(self, *args, **kwargs):
-        await self.execute()
 
 
 # def main():
