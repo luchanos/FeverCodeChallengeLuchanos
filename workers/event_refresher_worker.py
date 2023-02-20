@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import pathlib
 
+from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -77,7 +78,7 @@ def create_update_events_query(event, base_event_id):
     )
 
 
-async def main():
+async def event_refresher_worker():
     # async with aiohttp.ClientSession() as session:
     #     async with session.get('https://provider.code-challenge.feverup.com/api/events', ssl=False) as resp:
     #         xml_from_resp = await resp.text()
@@ -106,4 +107,10 @@ async def main():
                     await db_session.execute(update_events_query)
 
 
-asyncio.run(main())
+def main():
+    asyncio.run(event_refresher_worker())
+
+
+scheduler = BlockingScheduler()
+scheduler.add_job(main, "interval", minutes=1)
+scheduler.start()

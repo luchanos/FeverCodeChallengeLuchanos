@@ -4,32 +4,32 @@
 </p>
 
 # Summary
-This is a brief implementation of service.
+This is a brief implementation of service for operating with external providers events due to Fever Job Interview
+test task.
 
 # Content
-- [Обо мне](#about)
-- [Карьерный путь](#career)
-- [Мой стек](#stack)
-- [Что ещё я умею](#soft_skills)
-- [Личные достижения](#personal-achievements)
-- [Преподавательская деятельность](#teaching)
-- [Мой канал на youtube](#my-youtube-channel)
-- [Мои статьи на Хабр](#my-habr-articles)
+- [Overview](#Overview)
+- [Ideas](#ideas)
 
+# Overview
+The system consists of 3 main blocks:
+- API
 
-Что обязательно надо написать:
-- зачем сделал 3 разных сервиса?
-- собрать докерфайл (с вольюмами для боевой базы)
-- почему использую не модели, а асинкпг в тестах
-- зачем вообще тестировать с докерами?
-- рассказать, что система учитывает отмену или перенос мероприятий на другую дату
-- объяснить, почему мы храним все данные, а не только онлайн продажи
+Let us get an information about events in any datetime ranges, even historically.
 
-Ошибки и неточности в той апихе, которая построена авторами:
-- Нет проверки на то, что дата старта меньше даты финиша
-- В ответе ручки есть 31 сентября 2021 года, хотя эта дата невозможна
-- 2 раза написано min price в описании
+- Events updater worker
 
-Улучшения:
-- Добавить чанки в загрузку или написать отдельный импортер для этого
-- Параметризовать конфиги под каждого вендора в зависимости от того, как он собирается предоставлять нам данные
+This part responsible for refreshing actual data about events in database.
+
+- Events deactivator worker
+
+This part responsible for deactivation non-actual events in case of cancelling for example.
+
+# Ideas and Solutions
+
+Our API must be independent of providers side in situations, when provider is out of service. Furthermore, we need to
+keep RPS to providers side in acceptable ranges.
+
+Solution:
+We can get data from our providers periodically. This data we can store in database for future usage. For that reason
+in .workers/event_refresher_worker.py codebase was implemented.
