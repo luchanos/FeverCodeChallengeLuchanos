@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import json
 import os
 import uuid
 from typing import Any
@@ -118,7 +117,6 @@ async def create_event_in_database(asyncpg_pool):
         _id: uuid.UUID,
         event_id: str,
         base_event_id: str,
-        zones: list[dict],
         event_start_date: datetime.datetime,
         event_end_date: datetime.datetime,
         is_active: bool = True,
@@ -126,12 +124,11 @@ async def create_event_in_database(asyncpg_pool):
     ):
         async with asyncpg_pool.acquire() as connection:
             return await connection.execute(
-                """INSERT INTO events (id, event_id, base_event_id, zones, event_start_date, event_end_date, is_active, last_updated_dt)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)""",
+                """INSERT INTO events (id, event_id, base_event_id, event_start_date, event_end_date, is_active, last_updated_dt)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)""",
                 _id,
                 event_id,
                 base_event_id,
-                json.dumps(zones),
                 event_start_date,
                 event_end_date,
                 is_active,
@@ -139,3 +136,36 @@ async def create_event_in_database(asyncpg_pool):
             )
 
     return create_event_in_database_inner
+
+
+@pytest.fixture
+async def create_zone_in_database(asyncpg_pool):
+    async def create_zone_in_database_inner(
+        _id: uuid.UUID,
+        zone_id: str,
+        capacity: int,
+        price: float,
+        name: str,
+        event_id: str,
+        base_event_id: str,
+        numbered: bool = True,
+        is_active: bool = True,
+        last_updated_dt: datetime.datetime = datetime.datetime.now(),
+    ):
+        async with asyncpg_pool.acquire() as connection:
+            return await connection.execute(
+                """INSERT INTO zones (id, zone_id, capacity, price, name, numbered, event_id, base_event_id, is_active, last_updated_dt)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)""",
+                _id,
+                zone_id,
+                capacity,
+                price,
+                name,
+                numbered,
+                event_id,
+                base_event_id,
+                is_active,
+                last_updated_dt,
+            )
+
+    return create_zone_in_database_inner

@@ -11,7 +11,10 @@ async def test_ping(client):
 
 
 async def test_get_events_by_time_range(
-    client, create_base_event_in_database, create_event_in_database
+    client,
+    create_base_event_in_database,
+    create_event_in_database,
+    create_zone_in_database,
 ):
     base_events_for_database = [
         {
@@ -26,11 +29,6 @@ async def test_get_events_by_time_range(
             "_id": uuid.uuid4(),
             "event_id": "000111",
             "base_event_id": "111",
-            "zones": [
-                {"price": 10, "zone_id": "1"},
-                {"price": 20, "zone_id": "2"},
-                {"price": 30, "zone_id": "3"},
-            ],
             "is_active": True,
             "event_start_date": datetime.datetime.strptime(
                 "2021-07-31T20:00:00", "%Y-%m-%dT%H:%M:%S"
@@ -40,16 +38,32 @@ async def test_get_events_by_time_range(
             ),
         }
     ]
+    zones_for_database = [
+        {
+            "_id": uuid.uuid4(),
+            "zone_id": "test_zone_id",
+            "capacity": 200,
+            "price": 20,
+            "name": "Platea",
+            "numbered": True,
+            "event_id": "000111",
+            "base_event_id": "111",
+            "is_active": True,
+        }
+    ]
     for base_event in base_events_for_database:
         await create_base_event_in_database(**base_event)
     for event in events_for_database:
         await create_event_in_database(**event)
+    for zone in zones_for_database:
+        await create_zone_in_database(**zone)
 
     resp = client.get(
         "/search?start_date=2017-07-11T17:32:28Z&end_date=2022-07-21T17:32:28Z"
     )
     assert resp.status_code == 200
-    # data_from_response = resp.json()
+    data_from_response = resp.json()
+    assert len(data_from_response["data"]["events"]) == 1
 
 
 @pytest.mark.parametrize(
