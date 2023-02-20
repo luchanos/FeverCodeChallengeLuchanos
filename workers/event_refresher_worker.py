@@ -126,30 +126,33 @@ class EventRefreshWorker:
             )
         )
 
+    async def update_zones(self, event: Event, base_event_id: str, db_session):
+        for zone in event.zones:
+            update_zone_query = self.create_update_zone_query(
+                zone=zone,
+                event_id=event.event_id,
+                base_event_id=base_event_id,
+            )
+            await db_session.execute(update_zone_query)
+
+    async def update_events(self, base_event: BaseEvent, db_session):
+        base_event_id = base_event.base_event_id
+        for event in base_event.events:
+            update_events_query = self.create_update_events_query(event, base_event_id)
+            await db_session.execute(update_events_query)
+            await self.update_zones(
+                event=event, base_event_id=base_event_id, db_session=db_session
+            )
+
     async def refresh_storage(self, event_list: eventList, db_session):
         update_base_events_query = self.create_update_base_events_query(
             event_list.output.base_events
         )
         await db_session.execute(update_base_events_query)
-
         for base_event in event_list.output.base_events:
             if base_event.sell_mode not in self.__class__.APPROVED_SELL_MODE:
                 continue
-
-            base_event_id = base_event.base_event_id
-            for event in base_event.events:
-                update_events_query = self.create_update_events_query(
-                    event, base_event_id
-                )
-                await db_session.execute(update_events_query)
-
-                for zone in event.zones:
-                    update_zone_query = self.create_update_zone_query(
-                        zone=zone,
-                        event_id=event.event_id,
-                        base_event_id=base_event_id,
-                    )
-                    await db_session.execute(update_zone_query)
+            await self.update_events(base_event=base_event, db_session=db_session)
 
     async def execute(self):
         import pathlib
