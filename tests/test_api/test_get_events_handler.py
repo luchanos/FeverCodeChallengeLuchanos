@@ -1,6 +1,8 @@
 import datetime
 import uuid
 
+import pytest
+
 
 async def test_ping(client):
     resp = client.get("/ping")
@@ -43,7 +45,103 @@ async def test_get_events_by_time_range(
         await create_event_in_database(**event)
 
     resp = client.get(
-        "/1.0.0/search?start_date=2017-07-11T17:32:28Z&end_date=2022-07-21T17:32:28Z"
+        "/search?start_date=2017-07-11T17:32:28Z&end_date=2022-07-21T17:32:28Z"
     )
     assert resp.status_code == 200
     # data_from_response = resp.json()
+
+
+@pytest.mark.parametrize(
+    "request_params, expected_error_message",
+    [
+        (
+            {},
+            {
+                "detail": [
+                    {
+                        "loc": ["query", "start_date"],
+                        "msg": "field required",
+                        "type": "value_error.missing",
+                    },
+                    {
+                        "loc": ["query", "end_date"],
+                        "msg": "field required",
+                        "type": "value_error.missing",
+                    },
+                ]
+            },
+        ),
+        (
+            {
+                "start_date": "2017-07-11T17:32:28Z",
+            },
+            {
+                "detail": [
+                    {
+                        "loc": ["query", "end_date"],
+                        "msg": "field required",
+                        "type": "value_error.missing",
+                    }
+                ]
+            },
+        ),
+        (
+            {"end_date": "2022-07-21T17:32:28Z"},
+            {
+                "detail": [
+                    {
+                        "loc": ["query", "start_date"],
+                        "msg": "field required",
+                        "type": "value_error.missing",
+                    }
+                ]
+            },
+        ),
+        (
+            {"start_date": "bad_start_datetime", "end_date": "bad_end_datetime"},
+            {
+                "detail": [
+                    {
+                        "loc": ["query", "start_date"],
+                        "msg": "invalid datetime format",
+                        "type": "value_error.datetime",
+                    },
+                    {
+                        "loc": ["query", "end_date"],
+                        "msg": "invalid datetime format",
+                        "type": "value_error.datetime",
+                    },
+                ]
+            },
+        ),
+        (
+            {"start_date": "2022-07-11T17:32:28Z", "end_date": "2021-07-21T17:32:28Z"},
+            {"detail": "Start date can't be later, than end date"},
+        ),
+        (
+            {"start_date": "2020-09-31T17:32:28Z", "end_date": "2021-09-31T17:32:28Z"},
+            {
+                "detail": [
+                    {
+                        "loc": ["query", "start_date"],
+                        "msg": "invalid datetime format",
+                        "type": "value_error.datetime",
+                    },
+                    {
+                        "loc": ["query", "end_date"],
+                        "msg": "invalid datetime format",
+                        "type": "value_error.datetime",
+                    },
+                ]
+            },
+        ),
+    ],
+)
+async def test_get_events_by_time_range_422_validation_error(
+    client, request_params, expected_error_message
+):
+
+    resp = client.get("/search", params=request_params)
+    assert resp.status_code == 422
+    data_from_response = resp.json()
+    assert data_from_response == expected_error_message

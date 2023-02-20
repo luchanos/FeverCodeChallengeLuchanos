@@ -12,10 +12,9 @@ from api.v1_0_0.models import EventList
 from db.session import get_db
 
 events_router = APIRouter()
-api_v1_0_0_router = APIRouter()
 
 
-@events_router.get(path="/search")
+@events_router.get(path="/search", name="Lists the available events on a time range")
 async def get_events(
     start_date: datetime.datetime = Query(
         ...,
@@ -37,6 +36,3 @@ async def get_events(
         session=db, start_date=start_date, end_date=end_date
     )
     return BaseResponse(data=EventList(events=events))
-
-
-api_v1_0_0_router.include_router(events_router)

@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import APIRouter
 from fastapi import FastAPI
 
-from api.v1_0_0.handlers.event import api_v1_0_0_router
+from api.v1_0_0.handlers.event import events_router
 
 # from starlette.requests import Request
 
@@ -26,7 +26,7 @@ async def ping():
     return {"Success": True}
 
 
-app.include_router(api_v1_0_0_router, prefix="/1.0.0", tags=["1.0.0"])
+app.include_router(events_router)
 app.include_router(service_router)
 
 if __name__ == "__main__":
