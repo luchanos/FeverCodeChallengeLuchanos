@@ -10,47 +10,57 @@ async def test_ping(client):
     assert resp.json() == {"Success": True}
 
 
+@pytest.mark.parametrize(
+    "base_events_for_database, events_for_database, zones_for_database",
+    [
+        (
+            [
+                {
+                    "base_event_id": "111",
+                    "sell_mode": "online",
+                    "title": "Test Base Event",
+                    "is_active": True,
+                }
+            ],
+            [
+                {
+                    "_id": uuid.uuid4(),
+                    "event_id": "000111",
+                    "base_event_id": "111",
+                    "is_active": True,
+                    "event_start_date": datetime.datetime.strptime(
+                        "2021-07-31T20:00:00", "%Y-%m-%dT%H:%M:%S"
+                    ),
+                    "event_end_date": datetime.datetime.strptime(
+                        "2021-07-31T21:00:00", "%Y-%m-%dT%H:%M:%S"
+                    ),
+                }
+            ],
+            [
+                {
+                    "_id": uuid.uuid4(),
+                    "zone_id": "test_zone_id",
+                    "capacity": 200,
+                    "price": 20,
+                    "name": "Platea",
+                    "numbered": True,
+                    "event_id": "000111",
+                    "base_event_id": "111",
+                    "is_active": True,
+                }
+            ],
+        )
+    ],
+)
 async def test_get_events_by_time_range(
     client,
     create_base_event_in_database,
     create_event_in_database,
     create_zone_in_database,
+    base_events_for_database,
+    events_for_database,
+    zones_for_database,
 ):
-    base_events_for_database = [
-        {
-            "base_event_id": "111",
-            "sell_mode": "online",
-            "title": "Test Base Event",
-            "is_active": True,
-        }
-    ]
-    events_for_database = [
-        {
-            "_id": uuid.uuid4(),
-            "event_id": "000111",
-            "base_event_id": "111",
-            "is_active": True,
-            "event_start_date": datetime.datetime.strptime(
-                "2021-07-31T20:00:00", "%Y-%m-%dT%H:%M:%S"
-            ),
-            "event_end_date": datetime.datetime.strptime(
-                "2021-07-31T21:00:00", "%Y-%m-%dT%H:%M:%S"
-            ),
-        }
-    ]
-    zones_for_database = [
-        {
-            "_id": uuid.uuid4(),
-            "zone_id": "test_zone_id",
-            "capacity": 200,
-            "price": 20,
-            "name": "Platea",
-            "numbered": True,
-            "event_id": "000111",
-            "base_event_id": "111",
-            "is_active": True,
-        }
-    ]
     for base_event in base_events_for_database:
         await create_base_event_in_database(**base_event)
     for event in events_for_database:
