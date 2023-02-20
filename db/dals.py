@@ -34,7 +34,6 @@ class EventDAL:
                 zone_id=event["zone_id"],
             )
             self.db_session.add(new_event)
-        # todo luchanos тут я записываю всё сразу
         await self.db_session.flush()
 
     async def deactivate_events_older_than_limit(self, limit_days: int):

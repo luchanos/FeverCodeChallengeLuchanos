@@ -7,6 +7,7 @@ import pytest
 async def test_ping(client):
     resp = client.get("/ping")
     assert resp.status_code == 200
+    assert resp.json() == {"Success": True}
 
 
 async def test_get_events_by_time_range(
