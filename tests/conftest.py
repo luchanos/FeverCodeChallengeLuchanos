@@ -156,7 +156,8 @@ async def create_zone_in_database(asyncpg_pool: Pool) -> Callable:
     ):
         async with asyncpg_pool.acquire() as connection:
             return await connection.execute(
-                """INSERT INTO zones (id, zone_id, capacity, price, name, numbered, event_id, base_event_id, is_active, last_updated_dt)
+                """INSERT INTO zones
+                (id, zone_id, capacity, price, name, numbered, event_id, base_event_id, is_active, last_updated_dt)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)""",
                 _id,
                 zone_id,
