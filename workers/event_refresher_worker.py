@@ -59,7 +59,7 @@ def create_update_events_query(event, base_event_id):
                     event_end_date=event.event_end_date,
                     event_id=event.event_id,
                     base_event_id=base_event_id,
-                    zones=[x.dict() for x in event.zones],
+                    zones=[zone.dict() for zone in event.zones],
                 )
             ]
         )
@@ -75,13 +75,15 @@ def create_update_events_query(event, base_event_id):
     )
 
 
-async def event_refresher_worker():
+async def get_event_list_from_provider():
     async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://provider.code-challenge.feverup.com/api/events", ssl=False
-        ) as resp:
+        async with session.get(settings.PROVIDER_URL, ssl=False) as resp:
             xml_from_resp = await resp.text()
-            event_list = eventList.from_xml(xml_from_resp)
+            return eventList.from_xml(xml_from_resp)
+
+
+async def event_refresher_worker():
+    event_list = await get_event_list_from_provider()
 
     async with async_session() as db_session:
         async with db_session.begin():
