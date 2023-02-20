@@ -62,6 +62,7 @@ class Zone(Base):
             "zone_id",
             "base_event_id",
             "event_id",
+            "price",
             name="zone_id_base_event_id_event_id_idx",
         ),
     )

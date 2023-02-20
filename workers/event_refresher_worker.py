@@ -93,7 +93,12 @@ def create_update_zone_query(zone: Zone, event_id: str, base_event_id: str):
             ]
         )
         .on_conflict_do_update(
-            index_elements=[Zone.zone_id, Zone.base_event_id, Zone.event_id],
+            index_elements=[
+                Zone.zone_id,
+                Zone.base_event_id,
+                Zone.event_id,
+                Zone.price,
+            ],
             set_=dict(
                 last_updated_dt=datetime.datetime.now(),
                 is_active=True,

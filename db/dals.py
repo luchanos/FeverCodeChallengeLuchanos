@@ -1,9 +1,13 @@
 import datetime
 
+from sqlalchemy import func
+from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.models import BaseEvent
 from db.models import Event
+from db.models import Zone
 from db.raw_sql_queries import GET_EVENTS_BY_TIME_RANGE_QUERY
 
 
@@ -16,6 +20,39 @@ class EventDAL:
     async def get_events_by_time_range(
         self, start_date: datetime.datetime, end_date: datetime.datetime
     ) -> list:
+
+        subquery = (
+            select(
+                Event.id,
+                Zone.price,
+                Event.event_start_date,
+                Event.event_end_date,
+                Event.base_event_id,
+            )
+            .join(Event, Event.base_event_id == Zone.base_event_id)
+            .subquery()
+        )
+
+        query_2 = (
+            select(
+                BaseEvent.title,
+                subquery.c.id,
+                func.max(subquery.c.price),
+                func.min(subquery.c.price),
+                subquery.c.event_start_date,
+                subquery.c.event_end_date,
+            )
+            .join(subquery, subquery.c.base_event_id == BaseEvent.base_event_id)
+            .group_by(
+                subquery.c.id,
+                BaseEvent.title,
+                subquery.c.event_end_date,
+                subquery.c.event_start_date,
+            )
+        )
+
+        res = await self.db_session.execute(query_2)
+        # resulted = res.fetchall()
         res = await self.db_session.execute(
             GET_EVENTS_BY_TIME_RANGE_QUERY,
             {"start_date": start_date, "end_date": end_date},
