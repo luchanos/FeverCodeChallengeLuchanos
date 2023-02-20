@@ -66,11 +66,3 @@ class Zone(Base):
             name="zone_id_base_event_id_event_id_idx",
         ),
     )
-
-
-# class EventToZone(Base):
-#     __tablename__ = "event_2_zones"
-#
-#     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-#     zone_id = Column(String)
-#     event_id = Column(String, ForeignKey("events.event_id"))

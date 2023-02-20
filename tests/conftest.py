@@ -3,10 +3,12 @@ import datetime
 import os
 import uuid
 from typing import Any
+from typing import Callable
 from typing import Generator
 
 import asyncpg
 import pytest
+from asyncpg import Pool
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -34,7 +36,7 @@ async def run_migrations():
 
 
 @pytest.fixture(scope="session")
-async def async_session_test():
+async def async_session_test() -> sessionmaker:
     engine = create_async_engine(settings.TEST_DATABASE_URL, future=True, echo=True)
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     yield async_session
@@ -51,7 +53,7 @@ async def clean_tables(async_session_test):
                 )
 
 
-async def _get_test_db():
+async def _get_test_db() -> sessionmaker:
     try:
         # create async engine for interaction with database
         test_engine = create_async_engine(
@@ -80,7 +82,7 @@ async def client() -> Generator[TestClient, Any, None]:
 
 
 @pytest.fixture(scope="session")
-async def asyncpg_pool():
+async def asyncpg_pool() -> Pool:
     pool = await asyncpg.create_pool(
         "".join(settings.TEST_DATABASE_URL.split("+asyncpg"))
     )
@@ -89,7 +91,7 @@ async def asyncpg_pool():
 
 
 @pytest.fixture
-async def create_base_event_in_database(asyncpg_pool):
+async def create_base_event_in_database(asyncpg_pool: Pool):
     async def create_base_event_in_database_inner(
         base_event_id: str,
         sell_mode: str,
@@ -112,7 +114,7 @@ async def create_base_event_in_database(asyncpg_pool):
 
 
 @pytest.fixture
-async def create_event_in_database(asyncpg_pool):
+async def create_event_in_database(asyncpg_pool: Pool) -> Callable:
     async def create_event_in_database_inner(
         _id: uuid.UUID,
         event_id: str,
@@ -139,7 +141,7 @@ async def create_event_in_database(asyncpg_pool):
 
 
 @pytest.fixture
-async def create_zone_in_database(asyncpg_pool):
+async def create_zone_in_database(asyncpg_pool: Pool) -> Callable:
     async def create_zone_in_database_inner(
         _id: uuid.UUID,
         zone_id: str,
