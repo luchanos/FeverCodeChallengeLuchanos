@@ -1,7 +1,7 @@
 import asyncio
 import datetime
-import pathlib
 
+import aiohttp
 from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,8 +12,6 @@ import settings
 from db.models import BaseEvent
 from db.models import Event
 from workers.models import eventList
-
-# import aiohttp
 
 
 engine = create_async_engine(
@@ -52,7 +50,6 @@ def create_update_base_events_query(base_events):
 
 
 def create_update_events_query(event, base_event_id):
-    # todo если у нас что-то упадет по одному, то получится, что завалится все сразу
     return (
         insert(Event)
         .values(
@@ -79,25 +76,21 @@ def create_update_events_query(event, base_event_id):
 
 
 async def event_refresher_worker():
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.get('https://provider.code-challenge.feverup.com/api/events', ssl=False) as resp:
-    #         xml_from_resp = await resp.text()
-    #         event_list = eventList.from_xml(xml_from_resp)
-
-    xml_doc = pathlib.Path("response.xml").read_text()
-    event_list = eventList.from_xml(xml_doc)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+            "https://provider.code-challenge.feverup.com/api/events", ssl=False
+        ) as resp:
+            xml_from_resp = await resp.text()
+            event_list = eventList.from_xml(xml_from_resp)
 
     async with async_session() as db_session:
         async with db_session.begin():
-            # todo luchanos add chunks
             update_base_events_query = create_update_base_events_query(
                 event_list.output.base_events
             )
             await db_session.execute(update_base_events_query)
             for base_event in event_list.output.base_events:
-                if (
-                    base_event.sell_mode not in APPROVED_SELL_MODE
-                ):  # todo тут можно прописывать все типы и не делать проверку - делать только на выдаче
+                if base_event.sell_mode not in APPROVED_SELL_MODE:
                     continue
                 base_event_id = base_event.base_event_id
                 for event in base_event.events:
@@ -112,5 +105,5 @@ def main():
 
 
 scheduler = BlockingScheduler()
-scheduler.add_job(main, "interval", minutes=1)
+scheduler.add_job(main, "interval", minutes=settings.EVENT_REFRESHER_MINUTES_PERIOD)
 scheduler.start()

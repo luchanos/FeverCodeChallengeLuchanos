@@ -29,7 +29,10 @@ async def event_deactivator_func():
     async with async_session() as db_session:
         async with db_session.begin():
             event_dal = EventDAL(db_session=db_session)
-            event_deactivator = EventDeactivator(event_dal=event_dal, days_limit=0)
+            event_deactivator = EventDeactivator(
+                event_dal=event_dal,
+                days_limit=settings.EVENT_DEACTIVATOR_DAYS_VALID_PERIOD,
+            )
             await event_deactivator()
 
 
@@ -38,5 +41,5 @@ def main():
 
 
 scheduler = BlockingScheduler()
-scheduler.add_job(main, "interval", minutes=1)
+scheduler.add_job(main, "interval", minutes=settings.EVENT_DEACTIVATOR_MINUTES_PERIOD)
 scheduler.start()
