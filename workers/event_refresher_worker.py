@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import Insert
 
 import settings
 from db.models import BaseEvent
@@ -49,7 +50,7 @@ class EventRefreshWorker:
                 return eventList.from_xml(xml_from_resp)
 
     @staticmethod
-    def create_update_base_events_query(base_events):
+    def create_update_base_events_query(base_events: tuple[BaseEvent, ...]) -> Insert:
         return (
             insert(BaseEvent)
             .values(
@@ -69,7 +70,7 @@ class EventRefreshWorker:
         )
 
     @staticmethod
-    def create_update_events_query(event: Event, base_event_id: str):
+    def create_update_events_query(event: Event, base_event_id: str) -> Insert:
         return (
             insert(Event)
             .values(
@@ -94,7 +95,9 @@ class EventRefreshWorker:
         )
 
     @staticmethod
-    def create_update_zone_query(zone: Zone, event_id: str, base_event_id: str):
+    def create_update_zone_query(
+        zone: Zone, event_id: str, base_event_id: str
+    ) -> Insert:
         return (
             insert(Zone)
             .values(
@@ -128,7 +131,9 @@ class EventRefreshWorker:
             )
         )
 
-    async def update_zones(self, event: Event, base_event_id: str, db_session):
+    async def update_zones(
+        self, event: Event, base_event_id: str, db_session: AsyncSession
+    ):
         for zone in event.zones:
             update_zone_query = self.create_update_zone_query(
                 zone=zone,
@@ -137,7 +142,7 @@ class EventRefreshWorker:
             )
             await db_session.execute(update_zone_query)
 
-    async def update_events(self, base_event: BaseEvent, db_session):
+    async def update_events(self, base_event: BaseEvent, db_session: AsyncSession):
         base_event_id = base_event.base_event_id
         for event in base_event.events:
             update_events_query = self.create_update_events_query(event, base_event_id)
@@ -146,7 +151,7 @@ class EventRefreshWorker:
                 event=event, base_event_id=base_event_id, db_session=db_session
             )
 
-    async def refresh_storage(self, event_list: eventList, db_session):
+    async def refresh_storage(self, event_list: eventList, db_session: AsyncSession):
         update_base_events_query = self.create_update_base_events_query(
             event_list.output.base_events
         )
@@ -163,7 +168,7 @@ class EventRefreshWorker:
 
         async with self.db_session_instance() as db_session:
             async with db_session.begin():
-                await self.refresh_storage(event_list, db_session=db_session)
+                await self.refresh_storage(event_list=event_list, db_session=db_session)
 
 
 def main():
