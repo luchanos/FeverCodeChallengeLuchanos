@@ -32,12 +32,12 @@ keep RPS to providers side in acceptable ranges.
 
 Solution:
 We can get data from our providers periodically. This data we can store in database for future usage. For that reason
-in .workers/event_refresher_worker.py codebase was implemented. It creates new events and updates information about
+in [.workers/event_refresher_worker.py](workers/event_refresher_worker.py) codebase was implemented. It creates new events and updates information about
 old ones.
 
 Events have last_updated_dt field which shows last moment, when information about event was updated. If event cancelled
 then this field outdated more and more on each cycle of refreshing. On that way we can highlight them by simple query
-and deactivate by setting is_active field to False value.
+and deactivate by setting is_active field to False value by worker in [.workers/event_deactivator_worker.py](workers/event_deactivator_worker.py)
 
 If event just changed in time (early or later) - it's not a problem for us. Our worker handle with it too by refreshing
 datetime ranges fields.

@@ -15,7 +15,7 @@ class EventDAL:
 
     async def get_events_by_time_range(
         self, start_date: datetime.datetime, end_date: datetime.datetime
-    ):
+    ) -> list:
         res = await self.db_session.execute(
             GET_EVENTS_BY_TIME_RANGE_QUERY,
             {"start_date": start_date, "end_date": end_date},
