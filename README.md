@@ -1,4 +1,21 @@
-# FeverCodeChallengeLuchanos
+# Fever Code Challenge App by Nikolai Sviridov aka luchanos
+<p>
+<img src="https://raw.githubusercontent.com/gist/brudnak/aba00c9a1c92d226f68e8ad8ba1e0a40/raw/e1e4a92f6072d15014f19aa8903d24a1ac0c41a4/nyan-cat.gif" alt="drawing" width="500"/>
+</p>
+
+# Summary
+This is a brief implementation of service.
+
+# Content
+- [Обо мне](#about)
+- [Карьерный путь](#career)
+- [Мой стек](#stack)
+- [Что ещё я умею](#soft_skills)
+- [Личные достижения](#personal-achievements)
+- [Преподавательская деятельность](#teaching)
+- [Мой канал на youtube](#my-youtube-channel)
+- [Мои статьи на Хабр](#my-habr-articles)
+
 
 Что обязательно надо написать:
 - зачем сделал 3 разных сервиса?
