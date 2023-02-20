@@ -16,13 +16,6 @@ from workers.models import eventList
 # from apscheduler.schedulers.blocking import BlockingScheduler
 
 
-async def get_event_list_from_provider() -> eventList:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(settings.PROVIDER_URL, ssl=False) as resp:
-            xml_from_resp = await resp.text()
-            return eventList.from_xml(xml_from_resp)
-
-
 class EventRefreshWorker:
     APPROVED_SELL_MODE = [
         "online",
@@ -45,6 +38,12 @@ class EventRefreshWorker:
         self.db_session_instance = sessionmaker(
             engine, expire_on_commit=False, class_=AsyncSession
         )
+
+    async def get_event_list_from_provider(self) -> eventList:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.provider_url, ssl=False) as resp:
+                xml_from_resp = await resp.text()
+                return eventList.from_xml(xml_from_resp)
 
     @staticmethod
     def create_update_base_events_query(base_events):
