@@ -41,3 +41,9 @@ async def test_get_events_by_time_range(
         await create_base_event_in_database(**base_event)
     for event in events_for_database:
         await create_event_in_database(**event)
+
+    resp = client.get(
+        "/1.0.0/search?start_date=2017-07-11T17:32:28Z&end_date=2022-07-21T17:32:28Z"
+    )
+    assert resp.status_code == 200
+    # data_from_response = resp.json()
