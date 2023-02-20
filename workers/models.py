@@ -14,6 +14,9 @@ class BaseXmlTunedModel(BaseXmlModel):
 class Zone(BaseXmlTunedModel):
     price: float = attr()
     zone_id: str = attr()
+    capacity: int = attr()
+    name: str = attr()
+    numbered: bool = attr()
 
 
 class Event(BaseXmlTunedModel):

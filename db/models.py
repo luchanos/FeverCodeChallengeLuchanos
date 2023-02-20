@@ -4,10 +4,11 @@ import uuid
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
+from sqlalchemy import Float
 from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 
@@ -33,7 +34,6 @@ class Event(Base):
     event_id = Column(String)
     base_event_id = Column(String, ForeignKey("base_events.base_event_id"))
     is_active = Column(Boolean, default=True)
-    zones = Column(JSONB)
     last_updated_dt = Column(DateTime(timezone=True), default=datetime.datetime.now())
 
     __table_args__ = (
@@ -41,3 +41,35 @@ class Event(Base):
             "base_event_id", "event_id", name="base_event_id_event_id_idx"
         ),
     )
+
+
+class Zone(Base):
+    __tablename__ = "zones"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    zone_id = Column(String)
+    capacity = Column(Integer)
+    price = Column(Float)
+    name = Column(String)
+    numbered = Column(Boolean)
+    event_id = Column(String)
+    base_event_id = Column(String, ForeignKey("base_events.base_event_id"))
+    is_active = Column(Boolean, default=True)
+    last_updated_dt = Column(DateTime(timezone=True), default=datetime.datetime.now())
+
+    __table_args__ = (
+        UniqueConstraint(
+            "zone_id",
+            "base_event_id",
+            "event_id",
+            name="zone_id_base_event_id_event_id_idx",
+        ),
+    )
+
+
+# class EventToZone(Base):
+#     __tablename__ = "event_2_zones"
+#
+#     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+#     zone_id = Column(String)
+#     event_id = Column(String, ForeignKey("events.event_id"))

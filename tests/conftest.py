@@ -65,7 +65,7 @@ async def _get_test_db():
         )
         yield test_async_session()
     finally:
-        await test_async_session.close()
+        print("test session closed")
 
 
 @pytest.fixture(scope="function")

@@ -2,7 +2,6 @@ import asyncio
 import datetime
 
 import aiohttp
-from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -11,7 +10,10 @@ from sqlalchemy.orm import sessionmaker
 import settings
 from db.models import BaseEvent
 from db.models import Event
+from db.models import Zone
 from workers.models import eventList
+
+# from apscheduler.schedulers.blocking import BlockingScheduler
 
 
 engine = create_async_engine(
@@ -49,7 +51,7 @@ def create_update_base_events_query(base_events):
     )
 
 
-def create_update_events_query(event, base_event_id):
+def create_update_events_query(event: Event, base_event_id: str):
     return (
         insert(Event)
         .values(
@@ -59,7 +61,6 @@ def create_update_events_query(event, base_event_id):
                     event_end_date=event.event_end_date,
                     event_id=event.event_id,
                     base_event_id=base_event_id,
-                    zones=[zone.dict() for zone in event.zones],
                 )
             ]
         )
@@ -75,6 +76,36 @@ def create_update_events_query(event, base_event_id):
     )
 
 
+def create_update_zone_query(zone: Zone, event_id: str, base_event_id: str):
+    return (
+        insert(Zone)
+        .values(
+            [
+                dict(
+                    zone_id=zone.zone_id,
+                    capacity=zone.capacity,
+                    price=zone.price,
+                    name=zone.name,
+                    numbered=zone.numbered,
+                    event_id=event_id,
+                    base_event_id=base_event_id,
+                )
+            ]
+        )
+        .on_conflict_do_update(
+            index_elements=[Zone.zone_id, Zone.base_event_id, Zone.event_id],
+            set_=dict(
+                last_updated_dt=datetime.datetime.now(),
+                is_active=True,
+                capacity=zone.capacity,
+                price=zone.price,
+                name=zone.name,
+                numbered=zone.numbered,
+            ),
+        )
+    )
+
+
 async def get_event_list_from_provider() -> eventList:
     async with aiohttp.ClientSession() as session:
         async with session.get(settings.PROVIDER_URL, ssl=False) as resp:
@@ -83,17 +114,25 @@ async def get_event_list_from_provider() -> eventList:
 
 
 async def event_refresher_worker():
-    event_list = await get_event_list_from_provider()
+    # event_list = await get_event_list_from_provider()
+
+    import pathlib
+
+    xml_doc = pathlib.Path("response.xml").read_text()
+    event_list = eventList.from_xml(xml_doc)
 
     async with async_session() as db_session:
         async with db_session.begin():
+
             update_base_events_query = create_update_base_events_query(
                 event_list.output.base_events
             )
             await db_session.execute(update_base_events_query)
+
             for base_event in event_list.output.base_events:
                 if base_event.sell_mode not in APPROVED_SELL_MODE:
                     continue
+
                 base_event_id = base_event.base_event_id
                 for event in base_event.events:
                     update_events_query = create_update_events_query(
@@ -101,11 +140,19 @@ async def event_refresher_worker():
                     )
                     await db_session.execute(update_events_query)
 
+                    for zone in event.zones:
+                        update_zone_query = create_update_zone_query(
+                            zone=zone,
+                            event_id=event.event_id,
+                            base_event_id=base_event_id,
+                        )
+                        await db_session.execute(update_zone_query)
 
-def main():
-    asyncio.run(event_refresher_worker())
+
+# def main():
+asyncio.run(event_refresher_worker())
 
 
-scheduler = BlockingScheduler()
-scheduler.add_job(main, "interval", minutes=settings.EVENT_REFRESHER_MINUTES_PERIOD)
-scheduler.start()
+# scheduler = BlockingScheduler()
+# scheduler.add_job(main, "interval", minutes=settings.EVENT_REFRESHER_MINUTES_PERIOD)
+# scheduler.start()
