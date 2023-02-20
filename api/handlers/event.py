@@ -6,9 +6,9 @@ from fastapi import HTTPException
 from fastapi import Query
 from fastapi.params import Depends
 
-from api.v1_0_0.actions.events import get_events_by_date_range
-from api.v1_0_0.models import BaseResponse
-from api.v1_0_0.models import EventList
+from api.actions.events import get_events_by_date_range
+from api.models import BaseResponse
+from api.models import EventList
 from db.session import get_db
 
 events_router = APIRouter()

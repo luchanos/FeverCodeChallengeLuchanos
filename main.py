@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import APIRouter
 from fastapi import FastAPI
 
-from api.v1_0_0.handlers.event import events_router
+from api.handlers.event import events_router
 
 # from starlette.requests import Request
 

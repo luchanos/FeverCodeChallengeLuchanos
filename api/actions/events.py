@@ -2,7 +2,7 @@ import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1_0_0.models import EventSummary
+from api.models import EventSummary
 from db.dals import EventDAL
 
 

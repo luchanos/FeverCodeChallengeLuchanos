@@ -4,7 +4,7 @@ from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import Event
-from db.raw_sql_query import GET_EVENTS_BY_TIME_RANGE_QUERY
+from db.raw_sql_queries import GET_EVENTS_BY_TIME_RANGE_QUERY
 
 
 class EventDAL:
