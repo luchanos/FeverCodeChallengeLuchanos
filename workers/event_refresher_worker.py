@@ -2,6 +2,7 @@ import asyncio
 import datetime
 
 import aiohttp
+from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -13,7 +14,9 @@ from db.models import Event
 from db.models import Zone
 from workers.models import eventList
 
-# from apscheduler.schedulers.blocking import BlockingScheduler
+
+class EventWorkerSetupException(Exception):
+    pass
 
 
 class EventRefreshWorker:
@@ -154,24 +157,23 @@ class EventRefreshWorker:
             await self.update_events(base_event=base_event, db_session=db_session)
 
     async def __call__(self, *args, **kwargs):
-        import pathlib
-
-        xml_doc = pathlib.Path("response.xml").read_text()
-        event_list = eventList.from_xml(xml_doc)
+        event_list = await self.get_event_list_from_provider()
+        if self.db_session_instance is None:
+            raise EventWorkerSetupException("Db session instance has not been set up")
 
         async with self.db_session_instance() as db_session:
             async with db_session.begin():
                 await self.refresh_storage(event_list, db_session=db_session)
 
 
-# def main():
-event_refresh_worker = EventRefreshWorker(
-    provider_url="", db_url=settings.REAL_DATABASE_URL
-)
-event_refresh_worker.setup()
-asyncio.run(event_refresh_worker())
+def main():
+    event_refresh_worker = EventRefreshWorker(
+        provider_url=settings.PROVIDER_URL, db_url=settings.REAL_DATABASE_URL
+    )
+    event_refresh_worker.setup()
+    asyncio.run(event_refresh_worker())
 
 
-# scheduler = BlockingScheduler()
-# scheduler.add_job(main, "interval", minutes=settings.EVENT_REFRESHER_MINUTES_PERIOD)
-# scheduler.start()
+scheduler = BlockingScheduler()
+scheduler.add_job(main, "interval", minutes=settings.EVENT_REFRESHER_MINUTES_PERIOD)
+scheduler.start()
