@@ -9,7 +9,7 @@ services:
     ports:
       - "8082:80"
     volumes:
-      - ./app/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d:/etc/nginx/conf.d
     networks:
       - custom
   app:
