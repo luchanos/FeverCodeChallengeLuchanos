@@ -10,6 +10,10 @@ test task.
 # Content
 - [Overview](#Overview)
 - [Ideas](#ideas)
+- [Migrations](#migrations)
+- [Deployment](#deployment)
+- [Tests](#tests)
+
 
 # Overview
 The system consists of 3 main blocks:
@@ -41,3 +45,29 @@ and deactivate by setting is_active field to False value by worker in [.workers/
 
 If event just changed in time (early or later) - it's not a problem for us. Our worker handle with it too by refreshing
 datetime ranges fields.
+
+# Migrations
+
+For running migrations use [alembic](https://alembic.sqlalchemy.org/en/latest/) and follow this steps:
+
+## For local dev
+
+- Be sure that you have virtual environment on your project and activate it by ```venv/bin/activate```
+- Install all requirements by ```pip install -r requirements.txt```
+- Init alembic migrations by ```alembic init migrations```
+- Go to created alembic.ini file and set sqlalchemy.url to desirable database url address. Set postgresql://postgres:postgres@localhost:5432/postgres
+if you want to use default settings for local deployment (BUT! previously then you need to run ```make local_up``` then previously).
+- Go to created migrations/env.py file and change target_metadata value to ```target_metadata = Base.metadata``` (don't forget import Base class previously from db.models then).
+- Run ```alembic revision --autogenerate -m "comment to your migration"``` - migration file(s) will be generated.
+- Run ```alembic upgrade heads``` - all generated migrations will be run to the database.
+- Check database structure and make sure that everything run successfully.
+- PROFIT!!!
+
+# Deployment
+
+## Local
+
+For local development please use [docker-compose-local.yaml](docker-compose-local.yaml) file.
+
+- Run ```make up``` and wait until all containers started.
+- Run ```alembic init migrations``` from container with app
