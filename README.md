@@ -7,12 +7,16 @@
 This is a brief implementation of service for operating with external providers events due to Fever Job Interview
 test task.
 
+✋ PLEASE! IF YOU HAVE ANY QUESTIONS - LET'S DISCUSS IT! COOPERATION AND INTERACTION - WAY TO THE BEST PRODUCT EVER 😊
+
 # Content
 - [Overview](#Overview)
 - [Ideas](#ideas)
 - [Migrations](#migrations)
 - [Deployment](#deployment)
 - [Tests](#tests)
+- [Improvements](#improvements)
+- [ExtraMile](#extramile)
 - [FindedErrors](#findederrors)
 
 
@@ -108,6 +112,38 @@ For running local tests:
 - Run tests in project via IDE or in terminal by `pytest run` (make sure all requirement dependencies had been installed previously).
 - On the first time running it should fail, because we need to change alembic database to the test url (check credentials in [docker-compose-local.yaml](docker-compose-local.yaml)).
 - Rerun tests. If it's failed again because of database structure you can run migrations manually as mentioned above but with test database credentials.
+
+# Improvements
+
+Of course, I undertand that we need to set up here some sort of:
+- Metrics (Grafana, Prometheus)
+- Logs (Kibana, Elasticsearch)
+- Errors (Sentry)
+
+I can do it, but I think that as test task implementation it is not important.
+
+# ExtraMile
+
+For scaling our application we should understand the way of our product in the future. For example:
+- SLA
+- read/write relation
+- geography of users
+
+If we have geographically widespread usage of our application we can create several DNS servers with instances of our
+service and database. Database should be replicated and data there must be sharded into pieces for better accessibility
+and durability.
+
+We can use Kubernetes for orchestration our application. It let us run additional instances at peak hours automatically.
+
+Import of new events with hundreds of providers and hundreds of zones inside - operation with high time complexity.
+Because of that we can create standalone import service with common interface for all events, and it can be implemented
+via rabbitMQ or Kafka + several consumers.
+
+According to future task types it's possible to choose NoSQL database (as MongoDB) for solving specific searching tasks.
+
+We can provide cache on web-app side (time of expiry depends on time of data changing on provider side)
+
+On the Python side - we can use asyncio for better speed of I/O tasks.
 
 # FindedErrors
 
