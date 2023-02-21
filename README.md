@@ -13,6 +13,7 @@ test task.
 - [Migrations](#migrations)
 - [Deployment](#deployment)
 - [Tests](#tests)
+- [FindedErrors](#findederrors)
 
 
 # Overview
@@ -29,13 +30,13 @@ This part responsible for refreshing actual data about events in database.
 
 This part responsible for deactivation non-actual events in case of cancelling for example.
 
-# Ideas and Solutions
+# Ideas
 
 Our API must be independent of providers side in situations, when provider is out of service. Furthermore, we need to
 keep RPS to providers side in acceptable ranges.
 
 Solution:
-We can get data from our providers periodically. This data we can store in database for future usage. For that reason
+We can get data from our providers periodically and then use it on our side. For that reason
 in [.workers/event_refresher_worker.py](workers/event_refresher_worker.py) codebase was implemented. It creates new events and updates information about
 old ones.
 
@@ -55,7 +56,7 @@ For running migrations use [alembic](https://alembic.sqlalchemy.org/en/latest/) 
 - Be sure that you have virtual environment on your project and activate it by ```venv/bin/activate```
 - Install all requirements by ```pip install -r requirements.txt```
 - Init alembic migrations by ```alembic init migrations```
-- Go to created alembic.ini file and set sqlalchemy.url to desirable database url address. Set postgresql://postgres:postgres@localhost:5432/postgres
+- Go to created alembic.ini file and set sqlalchemy.url to desirable database url address. Set `postgresql://postgres:postgres@localhost:5432/postgres`
 if you want to use default settings for local deployment (BUT! previously then you need to run ```make local_up``` then previously).
 - Go to created migrations/env.py file and change target_metadata value to ```target_metadata = Base.metadata``` (don't forget import Base class previously from db.models then).
 - Run ```alembic revision --autogenerate -m "comment to your migration"``` - migration file(s) will be generated.
@@ -72,7 +73,7 @@ You must run migrations on production according to your corporate rules, but if 
 
 - Go to container with your app service on the server by ```docker exec -it <your_app_container_id> sh```
 - Init alembic migrations by ```alembic init migrations```
-- Go to created alembic.ini file and set sqlalchemy.url to desirable database url address - set here the value from env REAL_DATABASE_URL.
+- Go to created alembic.ini file and set sqlalchemy.url to desirable database url address - set here the value from env `REAL_DATABASE_URL`.
 - Go to created migrations/env.py file and change target_metadata value to ```target_metadata = Base.metadata``` (don't forget import Base class previously from db.models then).
 - Run ```alembic revision --autogenerate -m "comment to your migration"``` - migration file(s) will be generated.
 - Run ```alembic upgrade heads``` - all generated migrations will be run to the database.
@@ -94,3 +95,28 @@ other authorised responsible person for support!
 For production development please use settings from [docker-compose-ci.yaml](docker-compose-local.yaml) file (change it if necessary).
 
 - Run ```make run``` and wait until all containers started.
+
+# Tests
+
+For local testing in this project we don't use mocks of request to the database. We use containers - it let us check
+integrations between life-important components. This attitude good recommended itself in big projects with complex business logic in case
+of decreasing bugs appearance level. After building CI/CD pipeline it's possible use docker-in-docker attitude to run it
+on server side as a part of pipeline.
+
+For running local tests:
+- Run `make local_up` and wait until all containers started.
+- Run tests in project via IDE or in terminal by `pytest run` (make sure all requirement dependencies had been installed previously).
+- On the first time running it should fail, because we need to change alembic database to the test url (check credentials in [docker-compose-local.yaml](docker-compose-local.yaml)).
+- Rerun tests. If it's failed again because of database structure you can run migrations manually as mentioned above but with test database credentials.
+
+# FindedErrors
+
+Due to author's experience in checking [reference instance](https://app.swaggerhub.com/apis-docs/luis-pintado-feverup/backend-test/1.0.0) of API and data from provider it should be mentioned here some moments, which can be
+fixed in the future:
+
+- Now it's possible to set starts_at later than ends_at. The application tries to get data from database that is not necessary. It's better
+to have validation request params for that reason.
+- Now in [reference of providers data](https://provider.code-challenge.feverup.com/api/events) 31st September 2021 may be found. But September
+has only 30 days. It's a bug on provider side. The behaviour of our web service that way should be discussed - here several possible attitudes
+could be implemented.
+- Small mistake in description of max_price field. Now it's 'Min price from all the available tickets'
