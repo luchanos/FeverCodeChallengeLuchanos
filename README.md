@@ -63,11 +63,36 @@ if you want to use default settings for local deployment (BUT! previously then y
 - Check database structure and make sure that everything run successfully.
 - PROFIT!!!
 
+## For production
+
+![#f03c15] WARNING! SENSIBLE AREA! `#f03c15` Before running migrations on production state BE SURE that your other services wouldn't be affected by changes! It's mandatory to ask your TechLead or
+other authorised responsible person for support!
+
+You must run migrations on production according to your corporate rules, but if you have nothing of them you can use quite the same way as for local dev:
+
+- Go to container with your app service on the server by ```docker exec -it <your_app_container_id> sh```
+- Init alembic migrations by ```alembic init migrations```
+- Go to created alembic.ini file and set sqlalchemy.url to desirable database url address - set here the value from env REAL_DATABASE_URL.
+- Go to created migrations/env.py file and change target_metadata value to ```target_metadata = Base.metadata``` (don't forget import Base class previously from db.models then).
+- Run ```alembic revision --autogenerate -m "comment to your migration"``` - migration file(s) will be generated.
+- Run ```alembic upgrade heads``` - all generated migrations will be run to the database.
+- Check database structure and make sure that everything run successfully.
+- PROFIT!!!
+
 # Deployment
 
 ## Local
 
-For local development please use [docker-compose-local.yaml](docker-compose-local.yaml) file.
+For local development please use settings from [docker-compose-local.yaml](docker-compose-local.yaml) file (change it if necessary).
+
+- Run ```make up``` and wait until all containers started.
+- Run ```alembic init migrations``` from container with app
+
+## Production
+
+
+
+For production development please use settings from [docker-compose-ci.yaml](docker-compose-local.yaml) file (change it if necessary).
 
 - Run ```make up``` and wait until all containers started.
 - Run ```alembic init migrations``` from container with app
