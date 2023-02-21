@@ -65,7 +65,7 @@ if you want to use default settings for local deployment (BUT! previously then y
 
 ## For production
 
-![#f03c15] WARNING! SENSIBLE AREA! `#f03c15` Before running migrations on production state BE SURE that your other services wouldn't be affected by changes! It's mandatory to ask your TechLead or
+**<text style="color:red;">WARNING! SENSITIVE AREA!</text>** Before running migrations on production state BE SURE that your other services or critical functionality wouldn't be affected by changes! It's mandatory to ask your TechLead or
 other authorised responsible person for support!
 
 You must run migrations on production according to your corporate rules, but if you have nothing of them you can use quite the same way as for local dev:
@@ -85,14 +85,12 @@ You must run migrations on production according to your corporate rules, but if 
 
 For local development please use settings from [docker-compose-local.yaml](docker-compose-local.yaml) file (change it if necessary).
 
-- Run ```make up``` and wait until all containers started.
-- Run ```alembic init migrations``` from container with app
+- Run ```make local_up``` and wait until all containers started.
 
 ## Production
 
-
-
+**<text style="color:red;">WARNING! SENSITIVE AREA!</text>** Before deployment on production state BE SURE that your other services or critical functionality wouldn't be affected by changes! It's mandatory to ask your TechLead or
+other authorised responsible person for support!
 For production development please use settings from [docker-compose-ci.yaml](docker-compose-local.yaml) file (change it if necessary).
 
-- Run ```make up``` and wait until all containers started.
-- Run ```alembic init migrations``` from container with app
+- Run ```make run``` and wait until all containers started.
