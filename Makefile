@@ -5,7 +5,10 @@ local_down:
 	docker compose -f docker-compose-local.yaml down && docker network prune --force
 
 run:
-    docker compose -f docker-compose-ci.yaml up -d
+	docker compose -f docker-compose-ci.yaml up -d
 
 stop:
-    docker compose -f docker-compose-ci.yaml down && docker network prune --force
+	docker compose -f docker-compose-ci.yaml down && docker network prune --force
+
+linters:
+	black . && isort . && flake8

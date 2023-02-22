@@ -165,7 +165,6 @@ async def test_get_events_by_time_range(
 async def test_get_events_by_time_range_422_validation_error(
     client, request_params, expected_error_message
 ):
-
     resp = client.get("/search", params=request_params)
     assert resp.status_code == 422
     data_from_response = resp.json()

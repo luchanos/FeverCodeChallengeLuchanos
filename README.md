@@ -15,6 +15,7 @@ test task.
 - [Migrations](#migrations)
 - [Deployment](#deployment)
 - [Tests](#tests)
+- [APIDocs](#apidocs)
 - [Improvements](#improvements)
 - [ExtraMile](#extramile)
 - [FindedErrors](#findederrors)
@@ -73,6 +74,9 @@ if you want to use default settings for local deployment (BUT! previously then y
 **<text style="color:red;">WARNING! SENSITIVE AREA!</text>** Before running migrations on production state BE SURE that your other services or critical functionality wouldn't be affected by changes! It's mandatory to ask your TechLead or
 other authorised responsible person for support!
 
+Pay attention, that we use nginx as reverse-proxy server for our project via Docker. If you have already installed nginx on your target server please exclude nginx from docker-compose-ci and
+make other changes if necessary.
+
 You must run migrations on production according to your corporate rules, but if you have nothing of them you can use quite the same way as for local dev:
 
 - Go to container with your app service on the server by ```docker exec -it <your_app_container_id> sh```
@@ -83,6 +87,12 @@ You must run migrations on production according to your corporate rules, but if 
 - Run ```alembic upgrade heads``` - all generated migrations will be run to the database.
 - Check database structure and make sure that everything run successfully.
 - PROFIT!!!
+
+According to the task my implementation of database tables is:
+
+![alt text](docs/images/db_diagram.png)
+
+We use indexes for column of date types, because according to our task we have lots of requests for searching by that fields.
 
 # Deployment
 
@@ -113,12 +123,21 @@ For running local tests:
 - On the first time running it should fail, because we need to change alembic database to the test url (check credentials in [docker-compose-local.yaml](docker-compose-local.yaml)).
 - Rerun tests. If it's failed again because of database structure you can run migrations manually as mentioned above but with test database credentials.
 
+# APIDocs
+
+FastAPI is a framework which generates apidocs automatically based on created request/response Pydantic schemas.
+Documentation for APIs can be found on /docs endpoint of the webapp (by local default it is http://0.0.0.0:8000/docs).
+
+![alt text](docs/images/swagger.png)
+
 # Improvements
 
 Of course, I undertand that we need to set up here some sort of:
 - Metrics (Grafana, Prometheus)
 - Logs (Kibana, Elasticsearch)
 - Errors (Sentry)
+- Tests, tests, tests + coverage more than 85%
+- MyPy typings
 
 I can do it, but I think that as test task implementation it is not important.
 
@@ -144,6 +163,8 @@ According to future task types it's possible to choose NoSQL database (as MongoD
 We can provide cache on web-app side (time of expiry depends on time of data changing on provider side)
 
 On the Python side - we can use asyncio for better speed of I/O tasks.
+
+Anyway a lot of architecture decisions should be done according to business tasks, company resources and team expertise.
 
 # FindedErrors
 

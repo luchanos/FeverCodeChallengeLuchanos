@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/search": {
+      "get": {
+        "summary": "Lists The Available Events On A Time Range",
+        "operationId": "Lists_the_available_events_on_a_time_range_search_get",
+        "parameters": [
+          {
+            "description": "Return only events that starts after this date",
+            "required": true,
+            "schema": {
+              "title": "Start Date",
+              "type": "string",
+              "description": "Return only events that starts after this date",
+              "format": "date-time"
+            },
+            "example": "2017-07-21T17:32:28Z",
+            "name": "start_date",
+            "in": "query"
+          },
+          {
+            "description": "Return only events that finishes before this date",
+            "required": true,
+            "schema": {
+              "title": "End Date",
+              "type": "string",
+              "description": "Return only events that finishes before this date",
+              "format": "date-time"
+            },
+            "example": "2021-07-21T17:32:28Z",
+            "name": "end_date",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "summary": "Ping",
+        "operationId": "ping_ping_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseResponse": {
+        "title": "BaseResponse",
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/EventList"
+          }
+        }
+      },
+      "EventList": {
+        "title": "EventList",
+        "required": [
+          "events"
+        ],
+        "type": "object",
+        "properties": {
+          "events": {
+            "title": "Events",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventSummary"
+            },
+            "description": "List of available events due to request parameters"
+          }
+        }
+      },
+      "EventSummary": {
+        "title": "EventSummary",
+        "required": [
+          "id",
+          "title",
+          "start_date",
+          "start_time",
+          "end_date",
+          "end_time",
+          "max_price",
+          "min_price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "description": "Identifier for the plan (UUID)",
+            "format": "uuid"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string",
+            "description": "Title of the plan"
+          },
+          "start_date": {
+            "title": "Start Date",
+            "type": "string",
+            "description": "Date when the event starts in local time",
+            "format": "date"
+          },
+          "start_time": {
+            "title": "Start Time",
+            "type": "string",
+            "description": "Time when the event starts in local time",
+            "format": "time"
+          },
+          "end_date": {
+            "title": "End Date",
+            "type": "string",
+            "description": "Date when the event ends in local time",
+            "format": "date"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string",
+            "description": "Time when the event ends in local time",
+            "format": "time"
+          },
+          "max_price": {
+            "title": "Max Price",
+            "type": "number",
+            "description": "Max price from all the available tickets"
+          },
+          "min_price": {
+            "title": "Min Price",
+            "type": "number",
+            "description": "Min price from all the available tickets"
+          }
+        }
+      },
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

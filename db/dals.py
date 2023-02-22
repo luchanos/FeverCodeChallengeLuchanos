@@ -21,7 +21,6 @@ class EventDAL:
     async def get_events_by_time_range(
         self, start_date: datetime.datetime, end_date: datetime.datetime
     ) -> list[Row]:
-
         subquery = (
             select(
                 Event.id,
