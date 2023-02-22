@@ -18,7 +18,7 @@ test task.
 - [APIDocs](#apidocs)
 - [Improvements](#improvements)
 - [ExtraMile](#extramile)
-- [FindedErrors](#findederrors)
+- [ErrorsExposed](#errorsexposed)
 
 
 # Overview
@@ -62,8 +62,18 @@ For running migrations use [alembic](https://alembic.sqlalchemy.org/en/latest/) 
 - Install all requirements by ```pip install -r requirements.txt```
 - Init alembic migrations by ```alembic init migrations```
 - Go to created alembic.ini file and set sqlalchemy.url to desirable database url address. Set `postgresql://postgres:postgres@localhost:5432/postgres`
+
+![alt text](docs/images/db_url.png)
+
 if you want to use default settings for local deployment (BUT! previously then you need to run ```make local_up``` then previously).
+
+![alt text](docs/images/make_local_up.png)
+
 - Go to created migrations/env.py file and change target_metadata value to ```target_metadata = Base.metadata``` (don't forget import Base class previously from db.models then).
+
+![alt text](docs/images/metadata.png)
+
+
 - Run ```alembic revision --autogenerate -m "comment to your migration"``` - migration file(s) will be generated.
 - Run ```alembic upgrade heads``` - all generated migrations will be run to the database.
 - Check database structure and make sure that everything run successfully.
@@ -132,21 +142,56 @@ Documentation for APIs can be found on /docs endpoint of the webapp (by local de
 
 # Improvements
 
-Of course, I undertand that we need to set up here some sort of:
-- Metrics (Grafana, Prometheus)
-- Logs (Kibana, Elasticsearch)
-- Errors (Sentry)
-- Tests, tests, tests + coverage more than 85%
-- MyPy typings
+To improve the system, to make it robust and resilent:
 
-I can do it, but I think that as test task implementation it is not important.
+Operability and observability:
+- logs (Kibana, Elasticsearch)
+- metrics (Grafana, Prometheus)
+- alerts (Sentry)
+
+Maintainability and evolvability:
+- docs (design decisions, roadmap, tech goals, style and name conventions, feature development)
+- tests (pytest, sonar)
+- dependencies updater (poetry)
+- security analyzers
+- linters and formatters (MyPy e.t.c.)
 
 # ExtraMile
 
+Non-functional requirements should be clarified firstly to understand where we have to concentrate our efforts.
+
+Hypothetically:
+- reliable system should be performed
+- many reading operations
+- low writing operations
+- data consistence should be performed
+- fast work with thousands (or above) of RPS
+- acceptable resources costs for development and maintenance
+
+Common rules:
+- Always use common sense - never do optimization before it really necessary.
+- To understand where optimization should be done - clarification of system should be performed by observability.
+- Time to scale/optimizing: when utilization at least one main resource above 65% (CPU, RAM, HDD, IO).
+- Depending on resource which is under degradation we need to understand how to fix it.
+
+For example:
+- CPU - add resource and check codebase for optimization algorithms and libraries.
+- RAM - try to find leaks, add limits if necessary.
+- HDD - add storages (until finance department says we need to cut costs :D )
+
+For do all of that we have two possible options:
+- Deploy our services to AWS and it scales automatically. After that we pay our bills.
+- Buy new physical server or rack of servers.
+
+And we shouldn't forget about solving balancing questions, authorization, and choice between TCP and UDP for transfer data.
+
 For scaling our application we should understand the way of our product in the future. For example:
-- SLA
+- SLA, SLO
+- requirements for latency, throughput, data consistency
 - read/write relation
 - geography of users
+- project budget
+- team expertize
 
 If we have geographically widespread usage of our application we can create several DNS servers with instances of our
 service and database. Database should be replicated and data there must be sharded into pieces for better accessibility
@@ -164,9 +209,13 @@ We can provide cache on web-app side (time of expiry depends on time of data cha
 
 On the Python side - we can use asyncio for better speed of I/O tasks.
 
+We need to create several clusters with several shards, which should replicate each other.
+
+RabbitMQ / Kafka should fallback in standby mode.
+
 Anyway a lot of architecture decisions should be done according to business tasks, company resources and team expertise.
 
-# FindedErrors
+# ErrorsExposed
 
 Due to author's experience in checking [reference instance](https://app.swaggerhub.com/apis-docs/luis-pintado-feverup/backend-test/1.0.0) of API and data from provider it should be mentioned here some moments, which can be
 fixed in the future:
